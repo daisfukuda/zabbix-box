@@ -119,7 +119,7 @@ The time (in hundredths of a second) since the network management portion of the
                                     <expression>{min(5m)}&gt;{$CORE.UTIL.MAX}</expression>
                                     <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
                                     <recovery_expression>{max(5m)}&lt;={$CORE.UTIL.MAX.WARN}</recovery_expression>
-                                    <name>Hig core utilization &gt; {$CORE.UTIL.MAX}</name>
+                                    <name>High core utilization &gt; {$CORE.UTIL.MAX}</name>
                                     <priority>AVERAGE</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
