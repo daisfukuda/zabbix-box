@@ -1,0 +1,766 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>5.0</version>
+    <date>2021-09-24T02:16:34Z</date>
+    <groups>
+        <group>
+            <name>Templates/Operating systems</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template-WindowsSV-SNMP</template>
+            <name>Template-WindowsSV-SNMP</name>
+            <groups>
+                <group>
+                    <name>Templates/Operating systems</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>CPU</name>
+                </application>
+                <application>
+                    <name>General</name>
+                </application>
+                <application>
+                    <name>Memory</name>
+                </application>
+                <application>
+                    <name>Network interfaces</name>
+                </application>
+                <application>
+                    <name>Status</name>
+                </application>
+                <application>
+                    <name>Storage</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>SNMP traps (fallback)</name>
+                    <type>SNMP_TRAP</type>
+                    <key>snmptrap.fallback</key>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <value_type>LOG</value_type>
+                    <description>Item is used to collect all SNMP traps unmatched by other snmptrap items</description>
+                    <applications>
+                        <application>
+                            <name>General</name>
+                        </application>
+                    </applications>
+                    <logtimefmt>hh:mm:sszyyyy/MM/dd</logtimefmt>
+                </item>
+                <item>
+                    <name>System uptime</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>1.3.6.1.2.1.1.3.0</snmp_oid>
+                    <key>system.uptime[sysUpTime.0]</key>
+                    <delay>30s</delay>
+                    <history>2w</history>
+                    <trends>0</trends>
+                    <units>uptime</units>
+                    <description>MIB: SNMPv2-MIB&#13;
+The time (in hundredths of a second) since the network management portion of the system was last re-initialized.</description>
+                    <applications>
+                        <application>
+                            <name>Status</name>
+                        </application>
+                    </applications>
+                    <preprocessing>
+                        <step>
+                            <type>MULTIPLIER</type>
+                            <params>0.01</params>
+                        </step>
+                    </preprocessing>
+                    <triggers>
+                        <trigger>
+                            <expression>{last()}&lt;10m</expression>
+                            <name>{HOST.NAME} has been restarted (uptime &lt; 10m)</name>
+                            <priority>WARNING</priority>
+                            <description>Uptime is less than 10 minutes</description>
+                            <manual_close>YES</manual_close>
+                        </trigger>
+                    </triggers>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>Processors</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#SNMPVALUE},HOST-RESOURCES-MIB::hrProcessorLoad]</snmp_oid>
+                    <key>hrProcessorLoad</key>
+                    <delay>1h</delay>
+                    <description>{$SNMP_COMMUNITY} is a global macro.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>CPU Utilization of core #$1</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>HOST-RESOURCES-MIB::hrProcessorLoad.{#SNMPINDEX}</snmp_oid>
+                            <key>hrProcessorLoad[{#SNMPINDEX}]</key>
+                            <history>7d</history>
+                            <units>%</units>
+                            <description>The average, over the last minute, of the percentage of time that this processor was not idle. Implementations may approximate this one minute smoothing period if necessary.</description>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{min(5m)}&gt;{$CORE.UTIL.MAX.WARN}</expression>
+                                    <name>Hig core utilization &gt; {$CORE.UTIL.MAX.WARN}</name>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>Hig core utilization &gt; {$CORE.UTIL.MAX}</name>
+                                            <expression>{Template-WindowsSV-SNMP:hrProcessorLoad[{#SNMPINDEX}].min(5m)}&gt;{$CORE.UTIL.MAX}</expression>
+                                            <recovery_expression>{Template-WindowsSV-SNMP:hrProcessorLoad[{#SNMPINDEX}].max(5m)}&lt;={$CORE.UTIL.MAX.WARN}</recovery_expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{min(5m)}&gt;{$CORE.UTIL.MAX}</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{max(5m)}&lt;={$CORE.UTIL.MAX.WARN}</recovery_expression>
+                                    <name>Hig core utilization &gt; {$CORE.UTIL.MAX}</name>
+                                    <priority>AVERAGE</priority>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>CPU Utilization of core &quot;#{#SNMPINDEX}&quot;</name>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template-WindowsSV-SNMP</host>
+                                        <key>hrProcessorLoad[{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Network interfaces discovery</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#IFALIAS},1.3.6.1.2.1.31.1.1.1.18,{#IFNAME},1.3.6.1.2.1.31.1.1.1.1,{#IFDESCR},1.3.6.1.2.1.2.2.1.2]</snmp_oid>
+                    <key>net.if.discovery</key>
+                    <delay>1h</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#IFNAME}</macro>
+                                <value>{$NET.IF.IFNAME.MATCHES}</value>
+                                <formulaid>E</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFNAME}</macro>
+                                <value>{$NET.IF.IFNAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>F</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFDESCR}</macro>
+                                <value>{$NET.IF.IFDESCR.MATCHES}</value>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFDESCR}</macro>
+                                <value>{$NET.IF.IFDESCR.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFALIAS}</macro>
+                                <value>{$NET.IF.IFALIAS.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#IFALIAS}</macro>
+                                <value>{$NET.IF.IFALIAS.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <description>Discovering interfaces from IF-MIB.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Bits received</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.in[ifInOctets.{#SNMPINDEX}]</key>
+                            <history>7d</history>
+                            <units>bps</units>
+                            <description>MIB: IF-MIB&#13;
+The total number of octets received on the interface,including framing characters. Discontinuities in the value of this counter can occur at re-initialization of the management system, and atother times as indicated by the value of ifCounterDiscontinuityTime.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>8</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>Interface {#IFNAME}({#IFALIAS}): Bits sent</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}</snmp_oid>
+                            <key>net.if.out[ifOutOctets.{#SNMPINDEX}]</key>
+                            <history>7d</history>
+                            <units>bps</units>
+                            <description>MIB: IF-MIB&#13;
+The total number of octets transmitted out of the interface, including framing characters. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Interface {#IFNAME}({#IFALIAS})</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>CHANGE_PER_SECOND</type>
+                                    <params/>
+                                </step>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>8</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Network traffic of &quot;{#IFNAME}&quot;</name>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <drawtype>GRADIENT_LINE</drawtype>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template-WindowsSV-SNMP</host>
+                                        <key>net.if.in[ifInOctets.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <drawtype>BOLD_LINE</drawtype>
+                                    <color>2774A4</color>
+                                    <item>
+                                        <host>Template-WindowsSV-SNMP</host>
+                                        <key>net.if.out[ifOutOctets.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Storage discovery</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#FSNAME},1.3.6.1.2.1.25.2.3.1.3,{#FSTYPE},1.3.6.1.2.1.25.2.3.1.2,{#ALLOC_UNITS},1.3.6.1.2.1.25.2.3.1.4]</snmp_oid>
+                    <key>vfs.fs.discovery[snmp]</key>
+                    <delay>1h</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#FSTYPE}</macro>
+                                <value>{$VFS.FS.FSTYPE.MATCHES}</value>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSTYPE}</macro>
+                                <value>{$VFS.FS.FSTYPE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSNAME}</macro>
+                                <value>{$VFS.FS.FSNAME.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#FSNAME}</macro>
+                                <value>{$VFS.FS.FSNAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <description>HOST-RESOURCES-MIB::hrStorage discovery with storage filter.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#FSNAME}: Space utilization</name>
+                            <type>CALCULATED</type>
+                            <key>vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]</key>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <params>(last(&quot;vfs.fs.used[hrStorageUsed.{#SNMPINDEX}]&quot;)/last(&quot;vfs.fs.total[hrStorageSize.{#SNMPINDEX}]&quot;))*100</params>
+                            <description>Space utilization in % for {#FSNAME}</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Filesystem {#FSNAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;}</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}&lt;={$VFS.FS.PUSED.MAX.WARN:&quot;{#FSNAME}&quot;}</recovery_expression>
+                                    <name>{#FSNAME}: Disk space is critically low (used &gt; {$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;}%)</name>
+                                    <opdata>Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})</opdata>
+                                    <priority>AVERAGE</priority>
+                                    <manual_close>YES</manual_close>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$VFS.FS.PUSED.MAX.WARN:&quot;{#FSNAME}&quot;}</expression>
+                                    <name>{#FSNAME}: Disk space is low (used &gt; {$VFS.FS.PUSED.MAX.WARN:&quot;{#FSNAME}&quot;}%)</name>
+                                    <opdata>Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})</opdata>
+                                    <priority>WARNING</priority>
+                                    <manual_close>YES</manual_close>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>{#FSNAME}: Disk space is critically low (used &gt; {$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;}%)</name>
+                                            <expression>{Template-WindowsSV-SNMP:vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}].last()}&gt;{$VFS.FS.PUSED.MAX.CRIT:&quot;{#FSNAME}&quot;}</expression>
+                                            <recovery_expression>{Template-WindowsSV-SNMP:vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}].last()}&lt;={$VFS.FS.PUSED.MAX.WARN:&quot;{#FSNAME}&quot;}</recovery_expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#FSNAME}: Total space</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.2.1.25.2.3.1.5.{#SNMPINDEX}</snmp_oid>
+                            <key>vfs.fs.total[hrStorageSize.{#SNMPINDEX}]</key>
+                            <history>1h</history>
+                            <trends>0</trends>
+                            <units>B</units>
+                            <description>MIB: HOST-RESOURCES-MIB&#13;
+The size of the storage represented by this entry, in units of hrStorageAllocationUnits.&#13;
+This object is writable to allow remote configuration of the size of the storage area in those cases where such an operation makes sense and is possible on the underlying system.&#13;
+For example, the amount of main storage allocated to a buffer pool might be modified or the amount of disk space allocated to virtual storage might be modified.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Filesystem {#FSNAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>{#ALLOC_UNITS}</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#FSNAME}: Used space</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.2.1.25.2.3.1.6.{#SNMPINDEX}</snmp_oid>
+                            <key>vfs.fs.used[hrStorageUsed.{#SNMPINDEX}]</key>
+                            <history>1h</history>
+                            <trends>0</trends>
+                            <units>B</units>
+                            <description>MIB: HOST-RESOURCES-MIB&#13;
+The amount of the storage represented by this entry that is allocated, in units of hrStorageAllocationUnits.</description>
+                            <application_prototypes>
+                                <application_prototype>
+                                    <name>Filesystem {#FSNAME}</name>
+                                </application_prototype>
+                            </application_prototypes>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>{#ALLOC_UNITS}</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Disk space usage &quot;{#FSNAME}&quot;</name>
+                            <width>600</width>
+                            <height>340</height>
+                            <yaxismax>0</yaxismax>
+                            <show_work_period>NO</show_work_period>
+                            <show_triggers>NO</show_triggers>
+                            <type>EXPLODED</type>
+                            <show_3d>YES</show_3d>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>969696</color>
+                                    <calc_fnc>LAST</calc_fnc>
+                                    <type>GRAPH_SUM</type>
+                                    <item>
+                                        <host>Template-WindowsSV-SNMP</host>
+                                        <key>vfs.fs.total[hrStorageSize.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                                <graph_item>
+                                    <sortorder>2</sortorder>
+                                    <color>C80000</color>
+                                    <calc_fnc>LAST</calc_fnc>
+                                    <item>
+                                        <host>Template-WindowsSV-SNMP</host>
+                                        <key>vfs.fs.used[hrStorageUsed.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>Memory discovery</name>
+                    <type>SNMP_AGENT</type>
+                    <snmp_oid>discovery[{#MEMNAME},1.3.6.1.2.1.25.2.3.1.3,{#MEMTYPE},1.3.6.1.2.1.25.2.3.1.2,{#ALLOC_UNITS},1.3.6.1.2.1.25.2.3.1.4]</snmp_oid>
+                    <key>vm.memory.discovery</key>
+                    <delay>1h</delay>
+                    <filter>
+                        <evaltype>AND</evaltype>
+                        <conditions>
+                            <condition>
+                                <macro>{#MEMTYPE}</macro>
+                                <value>{$MEMORY.TYPE.MATCHES}</value>
+                                <formulaid>C</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#MEMTYPE}</macro>
+                                <value>{$MEMORY.TYPE.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>D</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#MEMNAME}</macro>
+                                <value>{$MEMORY.NAME.MATCHES}</value>
+                                <formulaid>A</formulaid>
+                            </condition>
+                            <condition>
+                                <macro>{#MEMNAME}</macro>
+                                <value>{$MEMORY.NAME.NOT_MATCHES}</value>
+                                <operator>NOT_MATCHES_REGEX</operator>
+                                <formulaid>B</formulaid>
+                            </condition>
+                        </conditions>
+                    </filter>
+                    <description>HOST-RESOURCES-MIB::hrStorage discovery with memory filter</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>{#MEMNAME}: Total memory</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.2.1.25.2.3.1.5.{#SNMPINDEX}</snmp_oid>
+                            <key>vm.memory.total[hrStorageSize.{#SNMPINDEX}]</key>
+                            <history>1h</history>
+                            <trends>0</trends>
+                            <units>B</units>
+                            <description>MIB: HOST-RESOURCES-MIB&#13;
+The size of the storage represented by this entry, in units of hrStorageAllocationUnits.&#13;
+This object is writable to allow remote configuration of the size of the storage area in those cases where such an operation makes sense and is possible on the underlying system.&#13;
+For example, the amount of main memory allocated to a buffer pool might be modified or the amount of disk space allocated to virtual memory might be modified.</description>
+                            <applications>
+                                <application>
+                                    <name>Memory</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>{#ALLOC_UNITS}</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#MEMNAME}: Used memory</name>
+                            <type>SNMP_AGENT</type>
+                            <snmp_oid>1.3.6.1.2.1.25.2.3.1.6.{#SNMPINDEX}</snmp_oid>
+                            <key>vm.memory.used[hrStorageUsed.{#SNMPINDEX}]</key>
+                            <history>1h</history>
+                            <trends>0</trends>
+                            <units>B</units>
+                            <description>MIB: HOST-RESOURCES-MIB&#13;
+The amount of the storage represented by this entry that is allocated, in units of hrStorageAllocationUnits.</description>
+                            <applications>
+                                <application>
+                                    <name>Memory</name>
+                                </application>
+                            </applications>
+                            <preprocessing>
+                                <step>
+                                    <type>MULTIPLIER</type>
+                                    <params>{#ALLOC_UNITS}</params>
+                                </step>
+                            </preprocessing>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>{#MEMNAME}: Memory Utilization</name>
+                            <type>CALCULATED</type>
+                            <key>vm.memory.util[memoryUsedPercentage.{#SNMPINDEX}]</key>
+                            <history>7d</history>
+                            <value_type>FLOAT</value_type>
+                            <units>%</units>
+                            <params>last(&quot;vm.memory.used[hrStorageUsed.{#SNMPINDEX}]&quot;)/last(&quot;vm.memory.total[hrStorageSize.{#SNMPINDEX}]&quot;)*100</params>
+                            <description>Memory utilization in %</description>
+                            <applications>
+                                <application>
+                                    <name>Memory</name>
+                                </application>
+                            </applications>
+                            <trigger_prototypes>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$MEMORY.UTIL.MAX}</expression>
+                                    <name>{#MEMNAME}: High memory utilization (&gt;{$MEMORY.UTIL.MAX.WARN}%)</name>
+                                    <priority>WARNING</priority>
+                                    <dependencies>
+                                        <dependency>
+                                            <name>{#MEMNAME}: High memory utilization (&gt;{$MEMORY.UTIL.MAX}%)</name>
+                                            <expression>{Template-WindowsSV-SNMP:vm.memory.util[memoryUsedPercentage.{#SNMPINDEX}].last()}&gt;{$MEMORY.UTIL.MAX}</expression>
+                                            <recovery_expression>{Template-WindowsSV-SNMP:vm.memory.util[memoryUsedPercentage.{#SNMPINDEX}].last()}&lt;={$MEMORY.UTIL.MAX.WARN}</recovery_expression>
+                                        </dependency>
+                                    </dependencies>
+                                </trigger_prototype>
+                                <trigger_prototype>
+                                    <expression>{last()}&gt;{$MEMORY.UTIL.MAX}</expression>
+                                    <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+                                    <recovery_expression>{last()}&lt;={$MEMORY.UTIL.MAX.WARN}</recovery_expression>
+                                    <name>{#MEMNAME}: High memory utilization (&gt;{$MEMORY.UTIL.MAX}%)</name>
+                                    <priority>AVERAGE</priority>
+                                    <description>The system is running out of free memory.</description>
+                                </trigger_prototype>
+                            </trigger_prototypes>
+                        </item_prototype>
+                    </item_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>Memory Utilization of &quot;{#MEMNAME}&quot;</name>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>1</sortorder>
+                                    <color>1A7C11</color>
+                                    <item>
+                                        <host>Template-WindowsSV-SNMP</host>
+                                        <key>vm.memory.util[memoryUsedPercentage.{#SNMPINDEX}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                </discovery_rule>
+            </discovery_rules>
+            <macros>
+                <macro>
+                    <macro>{$CORE.UTIL.MAX}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$CORE.UTIL.MAX.WARN}</macro>
+                    <value>80</value>
+                </macro>
+                <macro>
+                    <macro>{$IF.ERRORS.WARN}</macro>
+                    <value>2</value>
+                </macro>
+                <macro>
+                    <macro>{$IF.UTIL.MAX}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$IFCONTROL}</macro>
+                    <value>1</value>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.NAME.MATCHES}</macro>
+                    <value>.*</value>
+                    <description>This macro is used in memory discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.NAME.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>This macro is used in memory discovery. Can be overridden on the host or linked template level if you need to filter out results.</description>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.TYPE.MATCHES}</macro>
+                    <value>.*(\.2|hrStorageRam)$</value>
+                    <description>This macro is used in memory discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.TYPE.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>This macro is used in memory discovery. Can be overridden on the host or linked template level if you need to filter out results.</description>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.UTIL.MAX}</macro>
+                    <value>80</value>
+                    <description>The warning threshold of the &quot;Physical memory: Memory utilization&quot; item.</description>
+                </macro>
+                <macro>
+                    <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
+                    <value>60</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFALIAS.MATCHES}</macro>
+                    <value>.*</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFALIAS.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFDESCR.MATCHES}</macro>
+                    <value>.*</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFDESCR.NOT_MATCHES}</macro>
+                    <value>Miniport|Virtual|Teredo|Kernel|Loopback|Bluetooth|HTTPS|6to4|QoS|Layer|isatap|ISATAP</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNAME.MATCHES}</macro>
+                    <value>^.*$</value>
+                </macro>
+                <macro>
+                    <macro>{$NET.IF.IFNAME.NOT_MATCHES}</macro>
+                    <value>(^Software Loopback Interface|^NULL[0-9.]*$|^[Ll]o[0-9.]*$|^[Ss]ystem$|^Nu[0-9.]*$|^veth[0-9a-z]+$|docker[0-9]+|br-[a-z0-9]{12})</value>
+                    <description>Filter out loopbacks, nulls, docker veth links and docker0 bridge by default</description>
+                </macro>
+                <macro>
+                    <macro>{$SNMP.TIMEOUT}</macro>
+                    <value>5m</value>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSNAME.MATCHES}</macro>
+                    <value>.+</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSNAME.NOT_MATCHES}</macro>
+                    <value>^(/dev|/sys|/run|/proc|.+/shm$)</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSTYPE.MATCHES}</macro>
+                    <value>.*(\.4|\.9|hrStorageFixedDisk|hrStorageFlashMemory)$</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.FSTYPE.NOT_MATCHES}</macro>
+                    <value>CHANGE_IF_NEEDED</value>
+                    <description>This macro is used in filesystems discovery. Can be overridden on the host or linked template level.</description>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.PUSED.MAX.CRIT}</macro>
+                    <value>90</value>
+                </macro>
+                <macro>
+                    <macro>{$VFS.FS.PUSED.MAX.WARN}</macro>
+                    <value>80</value>
+                </macro>
+            </macros>
+            <screens>
+                <screen>
+                    <name>Graph screen</name>
+                    <hsize>1</hsize>
+                    <vsize>4</vsize>
+                    <screen_items>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>CPU Utilization of core &quot;#{#SNMPINDEX}&quot;</name>
+                                <host>Template-WindowsSV-SNMP</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Memory Utilization of &quot;{#MEMNAME}&quot;</name>
+                                <host>Template-WindowsSV-SNMP</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>1</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Disk space usage &quot;{#FSNAME}&quot;</name>
+                                <host>Template-WindowsSV-SNMP</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>2</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <style>0</style>
+                            <resource>
+                                <name>Network traffic of &quot;{#IFNAME}&quot;</name>
+                                <host>Template-WindowsSV-SNMP</host>
+                            </resource>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>3</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <url/>
+                            <application/>
+                            <max_columns>3</max_columns>
+                        </screen_item>
+                    </screen_items>
+                </screen>
+            </screens>
+        </template>
+    </templates>
+</zabbix_export>
