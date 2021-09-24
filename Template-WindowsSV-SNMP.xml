@@ -599,12 +599,12 @@ The amount of the storage represented by this entry that is allocated, in units 
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX}</macro>
-                    <value>80</value>
+                    <value>90</value>
                     <description>The warning threshold of the &quot;Physical memory: Memory utilization&quot; item.</description>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
-                    <value>60</value>
+                    <value>80</value>
                 </macro>
                 <macro>
                     <macro>{$NET.IF.IFALIAS.MATCHES}</macro>
