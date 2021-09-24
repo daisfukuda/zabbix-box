@@ -327,11 +327,11 @@ Total memory in Bytes</description>
                             <trigger_prototypes>
                                 <trigger_prototype>
                                     <expression>{min(5m)}&gt;{$CORE.UTIL.MAX.WARN}</expression>
-                                    <name>Hig core utilization &gt; {$CORE.UTIL.MAX.WARN}</name>
+                                    <name>High core utilization &gt; {$CORE.UTIL.MAX.WARN}</name>
                                     <priority>WARNING</priority>
                                     <dependencies>
                                         <dependency>
-                                            <name>Hig core utilization &gt; {$CORE.UTIL.MAX}</name>
+                                            <name>High core utilization &gt; {$CORE.UTIL.MAX}</name>
                                             <expression>{Template-LinuxSV-SNMP:hrProcessorLoad[{#SNMPINDEX}].min(5m)}&gt;{$CORE.UTIL.MAX}</expression>
                                             <recovery_expression>{Template-LinuxSV-SNMP:hrProcessorLoad[{#SNMPINDEX}].max(5m)}&lt;{$CORE.UTIL.MAX.WARN}</recovery_expression>
                                         </dependency>
@@ -341,7 +341,7 @@ Total memory in Bytes</description>
                                     <expression>{min(5m)}&gt;{$CORE.UTIL.MAX}</expression>
                                     <recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
                                     <recovery_expression>{max(5m)}&lt;{$CORE.UTIL.MAX.WARN}</recovery_expression>
-                                    <name>Hig core utilization &gt; {$CORE.UTIL.MAX}</name>
+                                    <name>High core utilization &gt; {$CORE.UTIL.MAX}</name>
                                     <priority>AVERAGE</priority>
                                 </trigger_prototype>
                             </trigger_prototypes>
@@ -765,11 +765,11 @@ The amount of the storage represented by this entry that is allocated, in units 
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX}</macro>
-                    <value>80</value>
+                    <value>90</value>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
-                    <value>60</value>
+                    <value>80</value>
                 </macro>
                 <macro>
                     <macro>{$NET.IF.IFADMINSTATUS.MATCHES}</macro>
