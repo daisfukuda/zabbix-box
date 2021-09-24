@@ -587,11 +587,11 @@ return (100 - value)</params>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX}</macro>
-                    <value>80</value>
+                    <value>90</value>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
-                    <value>60</value>
+                    <value>80</value>
                 </macro>
                 <macro>
                     <macro>{$NET.IF.IFNAME.MATCHES}</macro>
