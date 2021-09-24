@@ -105,11 +105,11 @@ The time (in hundredths of a second) since the network management portion of the
                             <trigger_prototypes>
                                 <trigger_prototype>
                                     <expression>{min(5m)}&gt;{$CORE.UTIL.MAX.WARN}</expression>
-                                    <name>Hig core utilization &gt; {$CORE.UTIL.MAX.WARN}</name>
+                                    <name>High core utilization &gt; {$CORE.UTIL.MAX.WARN}</name>
                                     <priority>WARNING</priority>
                                     <dependencies>
                                         <dependency>
-                                            <name>Hig core utilization &gt; {$CORE.UTIL.MAX}</name>
+                                            <name>High core utilization &gt; {$CORE.UTIL.MAX}</name>
                                             <expression>{Template-WindowsSV-SNMP:hrProcessorLoad[{#SNMPINDEX}].min(5m)}&gt;{$CORE.UTIL.MAX}</expression>
                                             <recovery_expression>{Template-WindowsSV-SNMP:hrProcessorLoad[{#SNMPINDEX}].max(5m)}&lt;={$CORE.UTIL.MAX.WARN}</recovery_expression>
                                         </dependency>
