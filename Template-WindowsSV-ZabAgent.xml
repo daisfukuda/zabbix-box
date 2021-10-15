@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2021-09-24T02:16:49Z</date>
+    <date>2021-10-15T02:06:31Z</date>
     <groups>
         <group>
             <name>Templates/Operating systems</name>
@@ -21,22 +21,10 @@
                     <name>CPU</name>
                 </application>
                 <application>
-                    <name>Filesystems</name>
-                </application>
-                <application>
-                    <name>General</name>
-                </application>
-                <application>
                     <name>Memory</name>
                 </application>
                 <application>
-                    <name>Network interfaces</name>
-                </application>
-                <application>
                     <name>Status</name>
-                </application>
-                <application>
-                    <name>Storage</name>
                 </application>
                 <application>
                     <name>Zabbix raw items</name>
@@ -46,7 +34,7 @@
                 <item>
                     <name>CPU utilization</name>
                     <key>system.cpu.util</key>
-                    <history>7d</history>
+                    <history>30d</history>
                     <value_type>FLOAT</value_type>
                     <units>%</units>
                     <description>CPU utilization in %</description>
@@ -133,7 +121,7 @@
                     <name>Memory utilization</name>
                     <type>CALCULATED</type>
                     <key>vm.memory.util</key>
-                    <history>7d</history>
+                    <history>30d</history>
                     <value_type>FLOAT</value_type>
                     <units>%</units>
                     <params>last(&quot;vm.memory.size[used]&quot;) / last(&quot;vm.memory.size[total]&quot;) * 100</params>
@@ -235,7 +223,7 @@
                         <item_prototype>
                             <name>Interface {#IFNAME}: Bits received</name>
                             <key>net.if.in[&quot;{#IFNAME}&quot;]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>bps</units>
                             <description>Incoming traffic on the network interface.</description>
                             <application_prototypes>
@@ -257,7 +245,7 @@
                         <item_prototype>
                             <name>Interface {#IFNAME}: Bits sent</name>
                             <key>net.if.out[&quot;{#IFNAME}&quot;]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>bps</units>
                             <description>Outgoing traffic on the network interface.</description>
                             <application_prototypes>
@@ -348,7 +336,7 @@ return JSON.stringify({&quot;data&quot;: output})</params>
                         <item_prototype>
                             <name>{#DEVNAME}: Disk read rate</name>
                             <key>perf_counter_en[&quot;\PhysicalDisk({#DEVNAME})\Disk Reads/sec&quot;,60]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>!r/s</units>
                             <description>Rate of read operations on the disk.</description>
@@ -361,7 +349,7 @@ return JSON.stringify({&quot;data&quot;: output})</params>
                         <item_prototype>
                             <name>{#DEVNAME}: Disk write rate</name>
                             <key>perf_counter_en[&quot;\PhysicalDisk({#DEVNAME})\Disk Writes/sec&quot;,60]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>!w/s</units>
                             <description>Rate of write operations on the disk.</description>
@@ -451,7 +439,7 @@ return JSON.stringify({&quot;data&quot;: output})</params>
                         <item_prototype>
                             <name>{#FSNAME}: Space utilization</name>
                             <key>vfs.fs.size[{#FSNAME},pused]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>%</units>
                             <description>Space utilization in % for {#FSNAME}</description>
@@ -601,12 +589,12 @@ return JSON.stringify({&quot;data&quot;: output})</params>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX}</macro>
-                    <value>90</value>
+                    <value>80</value>
                     <description>The warning threshold of the Memory util item.</description>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
-                    <value>80</value>
+                    <value>60</value>
                 </macro>
                 <macro>
                     <macro>{$NET.IF.IFALIAS.MATCHES}</macro>

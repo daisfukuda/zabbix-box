@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2021-09-24T02:16:34Z</date>
+    <date>2021-10-15T02:06:18Z</date>
     <groups>
         <group>
             <name>Templates/Operating systems</name>
@@ -18,22 +18,10 @@
             </groups>
             <applications>
                 <application>
-                    <name>CPU</name>
-                </application>
-                <application>
                     <name>General</name>
                 </application>
                 <application>
-                    <name>Memory</name>
-                </application>
-                <application>
-                    <name>Network interfaces</name>
-                </application>
-                <application>
                     <name>Status</name>
-                </application>
-                <application>
-                    <name>Storage</name>
                 </application>
             </applications>
             <items>
@@ -99,7 +87,7 @@ The time (in hundredths of a second) since the network management portion of the
                             <type>SNMP_AGENT</type>
                             <snmp_oid>HOST-RESOURCES-MIB::hrProcessorLoad.{#SNMPINDEX}</snmp_oid>
                             <key>hrProcessorLoad[{#SNMPINDEX}]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>%</units>
                             <description>The average, over the last minute, of the percentage of time that this processor was not idle. Implementations may approximate this one minute smoothing period if necessary.</description>
                             <trigger_prototypes>
@@ -192,7 +180,7 @@ The time (in hundredths of a second) since the network management portion of the
                             <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.2.1.2.2.1.10.{#SNMPINDEX}</snmp_oid>
                             <key>net.if.in[ifInOctets.{#SNMPINDEX}]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>bps</units>
                             <description>MIB: IF-MIB&#13;
 The total number of octets received on the interface,including framing characters. Discontinuities in the value of this counter can occur at re-initialization of the management system, and atother times as indicated by the value of ifCounterDiscontinuityTime.</description>
@@ -217,7 +205,7 @@ The total number of octets received on the interface,including framing character
                             <type>SNMP_AGENT</type>
                             <snmp_oid>1.3.6.1.2.1.2.2.1.16.{#SNMPINDEX}</snmp_oid>
                             <key>net.if.out[ifOutOctets.{#SNMPINDEX}]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>bps</units>
                             <description>MIB: IF-MIB&#13;
 The total number of octets transmitted out of the interface, including framing characters. Discontinuities in the value of this counter can occur at re-initialization of the management system, and at other times as indicated by the value of ifCounterDiscontinuityTime.</description>
@@ -303,7 +291,7 @@ The total number of octets transmitted out of the interface, including framing c
                             <name>{#FSNAME}: Space utilization</name>
                             <type>CALCULATED</type>
                             <key>vfs.fs.pused[storageUsedPercentage.{#SNMPINDEX}]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>%</units>
                             <params>(last(&quot;vfs.fs.used[hrStorageUsed.{#SNMPINDEX}]&quot;)/last(&quot;vfs.fs.total[hrStorageSize.{#SNMPINDEX}]&quot;))*100</params>
@@ -467,11 +455,6 @@ The amount of the storage represented by this entry that is allocated, in units 
 The size of the storage represented by this entry, in units of hrStorageAllocationUnits.&#13;
 This object is writable to allow remote configuration of the size of the storage area in those cases where such an operation makes sense and is possible on the underlying system.&#13;
 For example, the amount of main memory allocated to a buffer pool might be modified or the amount of disk space allocated to virtual memory might be modified.</description>
-                            <applications>
-                                <application>
-                                    <name>Memory</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>MULTIPLIER</type>
@@ -489,11 +472,6 @@ For example, the amount of main memory allocated to a buffer pool might be modif
                             <units>B</units>
                             <description>MIB: HOST-RESOURCES-MIB&#13;
 The amount of the storage represented by this entry that is allocated, in units of hrStorageAllocationUnits.</description>
-                            <applications>
-                                <application>
-                                    <name>Memory</name>
-                                </application>
-                            </applications>
                             <preprocessing>
                                 <step>
                                     <type>MULTIPLIER</type>
@@ -505,16 +483,11 @@ The amount of the storage represented by this entry that is allocated, in units 
                             <name>{#MEMNAME}: Memory Utilization</name>
                             <type>CALCULATED</type>
                             <key>vm.memory.util[memoryUsedPercentage.{#SNMPINDEX}]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>%</units>
                             <params>last(&quot;vm.memory.used[hrStorageUsed.{#SNMPINDEX}]&quot;)/last(&quot;vm.memory.total[hrStorageSize.{#SNMPINDEX}]&quot;)*100</params>
                             <description>Memory utilization in %</description>
-                            <applications>
-                                <application>
-                                    <name>Memory</name>
-                                </application>
-                            </applications>
                             <trigger_prototypes>
                                 <trigger_prototype>
                                     <expression>{last()}&gt;{$MEMORY.UTIL.MAX}</expression>
@@ -599,12 +572,12 @@ The amount of the storage represented by this entry that is allocated, in units 
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX}</macro>
-                    <value>90</value>
+                    <value>80</value>
                     <description>The warning threshold of the &quot;Physical memory: Memory utilization&quot; item.</description>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
-                    <value>80</value>
+                    <value>60</value>
                 </macro>
                 <macro>
                     <macro>{$NET.IF.IFALIAS.MATCHES}</macro>

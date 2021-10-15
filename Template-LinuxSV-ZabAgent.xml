@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <zabbix_export>
     <version>5.0</version>
-    <date>2021-09-24T02:16:15Z</date>
+    <date>2021-10-15T02:06:01Z</date>
     <groups>
         <group>
             <name>Templates/Operating systems</name>
@@ -31,7 +31,7 @@
                 <item>
                     <name>Load average (1m avg)</name>
                     <key>system.cpu.load[all,avg1]</key>
-                    <history>7d</history>
+                    <history>30d</history>
                     <value_type>FLOAT</value_type>
                     <applications>
                         <application>
@@ -62,7 +62,7 @@
                     <type>DEPENDENT</type>
                     <key>system.cpu.util</key>
                     <delay>0</delay>
-                    <history>7d</history>
+                    <history>30d</history>
                     <value_type>FLOAT</value_type>
                     <units>%</units>
                     <description>CPU utilization in %</description>
@@ -123,7 +123,7 @@ return (100 - value)</params>
                 <item>
                     <name>Free swap space</name>
                     <key>system.swap.size[,free]</key>
-                    <history>7d</history>
+                    <history>30d</history>
                     <units>B</units>
                     <description>The free space of swap volume/file in bytes.</description>
                     <applications>
@@ -200,7 +200,7 @@ return (100 - value)</params>
                     <type>DEPENDENT</type>
                     <key>vm.memory.utilization</key>
                     <delay>0</delay>
-                    <history>7d</history>
+                    <history>30d</history>
                     <value_type>FLOAT</value_type>
                     <units>%</units>
                     <description>Memory used percentage is calculated as (100-pavailable)</description>
@@ -268,7 +268,7 @@ return (100 - value)</params>
                         <item_prototype>
                             <name>Interface {#IFNAME}: Bits received</name>
                             <key>net.if.in[&quot;{#IFNAME}&quot;]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>bps</units>
                             <application_prototypes>
                                 <application_prototype>
@@ -289,7 +289,7 @@ return (100 - value)</params>
                         <item_prototype>
                             <name>Interface {#IFNAME}: Bits sent</name>
                             <key>net.if.out[&quot;{#IFNAME}&quot;]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <units>bps</units>
                             <application_prototypes>
                                 <application_prototype>
@@ -363,7 +363,7 @@ return (100 - value)</params>
                             <type>DEPENDENT</type>
                             <key>vfs.dev.read.rate[{#DEVNAME}]</key>
                             <delay>0</delay>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>!r/s</units>
                             <description>r/s. The number (after merges) of read requests completed per second for the device.</description>
@@ -391,7 +391,7 @@ return (100 - value)</params>
                             <type>DEPENDENT</type>
                             <key>vfs.dev.write.rate[{#DEVNAME}]</key>
                             <delay>0</delay>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>!w/s</units>
                             <description>w/s. The number (after merges) of write requests completed per second for the device.</description>
@@ -496,7 +496,7 @@ return (100 - value)</params>
                         <item_prototype>
                             <name>{#FSNAME}: Space utilization</name>
                             <key>vfs.fs.size[{#FSNAME},pused]</key>
-                            <history>7d</history>
+                            <history>30d</history>
                             <value_type>FLOAT</value_type>
                             <units>%</units>
                             <description>Space utilization in % for {#FSNAME}</description>
@@ -587,11 +587,11 @@ return (100 - value)</params>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX}</macro>
-                    <value>90</value>
+                    <value>80</value>
                 </macro>
                 <macro>
                     <macro>{$MEMORY.UTIL.MAX.WARN}</macro>
-                    <value>80</value>
+                    <value>60</value>
                 </macro>
                 <macro>
                     <macro>{$NET.IF.IFNAME.MATCHES}</macro>
